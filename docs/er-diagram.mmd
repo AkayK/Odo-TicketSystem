@@ -1,0 +1,71 @@
+erDiagram
+    roles {
+        int id PK
+        varchar name UK "admin, manager, worker"
+        varchar description
+        timestamp created_at
+    }
+
+    departments {
+        int id PK
+        varchar name UK "IT, HR, Finance, Operations, General"
+        varchar description
+        boolean is_active
+        timestamp created_at
+    }
+
+    users {
+        int id PK
+        varchar email UK
+        varchar password_hash
+        varchar first_name
+        varchar last_name
+        int role_id FK
+        int department_id FK
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        int id PK
+        varchar name UK
+        varchar description
+        int department_id FK
+        boolean is_active
+        timestamp created_at
+    }
+
+    tickets {
+        int id PK
+        varchar title
+        text description
+        int category_id FK
+        enum priority "low, medium, high, critical"
+        enum status "open, in_progress, on_hold, closed"
+        int created_by FK
+        int assigned_to FK
+        int department_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ticket_history {
+        int id PK
+        int ticket_id FK
+        int changed_by FK
+        varchar field_changed
+        varchar old_value
+        varchar new_value
+        timestamp created_at
+    }
+
+    roles ||--o{ users : "has"
+    departments ||--o{ users : "belongs to"
+    departments ||--o{ categories : "has"
+    departments ||--o{ tickets : "assigned to"
+    categories ||--o{ tickets : "categorized as"
+    users ||--o{ tickets : "created by"
+    users ||--o{ tickets : "assigned to"
+    tickets ||--o{ ticket_history : "has"
+    users ||--o{ ticket_history : "changed by"
