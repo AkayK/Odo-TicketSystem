@@ -36,10 +36,12 @@ export default function DashboardPage() {
               <h3>User Management</h3>
               <p className="card-detail">Create and manage system users</p>
             </div>
-            <div className="card">
+            <div
+              className="card card-clickable"
+              onClick={() => navigate('/admin/categories')}
+            >
               <h3>Category Management</h3>
               <p className="card-detail">Manage ticket categories</p>
-              <p className="card-placeholder">Coming soon...</p>
             </div>
           </>
         )}
