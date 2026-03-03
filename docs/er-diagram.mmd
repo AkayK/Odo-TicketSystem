@@ -46,6 +46,8 @@ erDiagram
         int created_by FK
         int assigned_to FK
         int department_id FK
+        datetime close_requested_at
+        int close_requested_by FK
         timestamp created_at
         timestamp updated_at
     }
@@ -67,5 +69,6 @@ erDiagram
     categories ||--o{ tickets : "categorized as"
     users ||--o{ tickets : "created by"
     users ||--o{ tickets : "assigned to"
+    users ||--o{ tickets : "close requested by"
     tickets ||--o{ ticket_history : "has"
     users ||--o{ ticket_history : "changed by"

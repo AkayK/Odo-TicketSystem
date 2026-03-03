@@ -2,18 +2,22 @@ const pool = require('../config/database');
 
 const BASE_SELECT = `
   SELECT t.id, t.title, t.description, t.priority, t.status,
+         t.close_requested_at, t.close_requested_by,
          t.created_at, t.updated_at,
          c.id AS category_id, c.name AS category_name,
          d.id AS department_id, d.name AS department_name,
          cu.id AS creator_id, cu.first_name AS creator_first_name,
          cu.last_name AS creator_last_name, cu.email AS creator_email,
          au.id AS assignee_id, au.first_name AS assignee_first_name,
-         au.last_name AS assignee_last_name, au.email AS assignee_email
+         au.last_name AS assignee_last_name, au.email AS assignee_email,
+         cru.first_name AS close_requester_first_name,
+         cru.last_name AS close_requester_last_name
   FROM tickets t
   JOIN categories c ON t.category_id = c.id
   JOIN departments d ON t.department_id = d.id
   JOIN users cu ON t.created_by = cu.id
-  LEFT JOIN users au ON t.assigned_to = au.id`;
+  LEFT JOIN users au ON t.assigned_to = au.id
+  LEFT JOIN users cru ON t.close_requested_by = cru.id`;
 
 const SORT_WHITELIST = {
   created_at: 't.created_at',
@@ -32,8 +36,15 @@ const ticketModel = {
       conditions.push('t.department_id = ?');
       params.push(departmentId);
     } else if (role !== 'admin') {
-      conditions.push('(t.created_by = ? OR t.assigned_to = ?)');
-      params.push(userId, userId);
+      if (filters.scope === 'crossDeptCreated') {
+        conditions.push('t.created_by = ?');
+        params.push(userId);
+        conditions.push('t.department_id != ?');
+        params.push(departmentId);
+      } else {
+        conditions.push('(t.assigned_to = ? OR t.created_by = ?)');
+        params.push(userId, userId);
+      }
     }
 
     if (filters.status) {
@@ -111,6 +122,8 @@ const ticketModel = {
     if (fields.status !== undefined) { columns.push('status = ?'); values.push(fields.status); }
     if (fields.assignedTo !== undefined) { columns.push('assigned_to = ?'); values.push(fields.assignedTo); }
     if (fields.departmentId !== undefined) { columns.push('department_id = ?'); values.push(fields.departmentId); }
+    if (fields.closeRequestedAt !== undefined) { columns.push('close_requested_at = ?'); values.push(fields.closeRequestedAt); }
+    if (fields.closeRequestedBy !== undefined) { columns.push('close_requested_by = ?'); values.push(fields.closeRequestedBy); }
 
     if (columns.length === 0) return;
 

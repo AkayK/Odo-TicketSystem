@@ -23,5 +23,7 @@ router.post('/', writeLimiter, ticketController.create);
 router.put('/:id', writeLimiter, ticketController.update);
 router.put('/:id/status', writeLimiter, ticketController.changeStatus);
 router.put('/:id/assign', writeLimiter, ticketController.assign);
+router.put('/:id/request-close', writeLimiter, ticketController.requestClose);
+router.put('/:id/close-request', writeLimiter, ticketController.handleCloseRequest);
 
 module.exports = router;

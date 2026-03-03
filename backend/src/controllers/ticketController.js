@@ -16,8 +16,9 @@ const MAX_SEARCH_LENGTH = 200;
 
 const ticketController = {
   async getAll(req, res) {
-    const { status, priority, departmentId, categoryId, assignedTo, search, sortBy, sortOrder } = req.query;
+    const { status, priority, departmentId, categoryId, assignedTo, search, sortBy, sortOrder, scope } = req.query;
     const filters = {};
+    if (scope) filters.scope = scope;
 
     if (status) {
       if (!VALID_FILTER_STATUSES.includes(status)) {
@@ -115,6 +116,32 @@ const ticketController = {
     const id = parseId(req.params.id);
     const history = await ticketService.getHistory(id, req.user);
     res.json({ success: true, data: history });
+  },
+
+  async requestClose(req, res) {
+    const id = parseId(req.params.id);
+    const ticket = await ticketService.requestClose(id, req.user);
+
+    logger.info('Close request submitted', {
+      requestedBy: req.user.id,
+      ticketId: id,
+    });
+
+    res.json({ success: true, data: ticket });
+  },
+
+  async handleCloseRequest(req, res) {
+    const id = parseId(req.params.id);
+    const { action } = req.body;
+    const ticket = await ticketService.handleCloseRequest(id, { action }, req.user);
+
+    logger.info('Close request handled', {
+      handledBy: req.user.id,
+      ticketId: id,
+      action,
+    });
+
+    res.json({ success: true, data: ticket });
   },
 };
 

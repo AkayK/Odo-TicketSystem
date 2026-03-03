@@ -24,8 +24,17 @@ function fieldLabel(field) {
     status: 'Status',
     category_id: 'Category',
     assigned_to: 'Assigned To',
+    close_request: 'Close Request',
   };
   return map[field] || field;
+}
+
+function formatHistoryValue(field, value) {
+  if (value === null || value === undefined) return value;
+  if (field === 'status') return statusLabels[value] || value;
+  if (field === 'priority') return priorityLabels[value] || value;
+  if (field === 'close_request') return value.charAt(0).toUpperCase() + value.slice(1);
+  return value;
 }
 
 export default function TicketDetailPage() {
@@ -118,17 +127,6 @@ export default function TicketDetailPage() {
     }
   };
 
-  const handleSelfAssign = async () => {
-    setActionError('');
-    try {
-      const updated = await ticketService.assign(id, user.id);
-      setTicket(updated);
-      const updatedHistory = await ticketService.getHistory(id);
-      setHistory(updatedHistory);
-    } catch (err) {
-      setActionError(err.response?.data?.error || 'Failed to take ticket');
-    }
-  };
 
   const startEditing = () => {
     setEditing(true);
@@ -192,14 +190,49 @@ export default function TicketDetailPage() {
 
   const canChangePriority = ticket && ticket.status !== 'closed' && (isAdmin || isManager);
 
-  const canSelfAssign = ticket && isWorker && ticket.status !== 'closed'
-    && !ticket.assignedTo
-    && ticket.department.id === user.departmentId;
+  const isCreator = ticket && ticket.createdBy.id === user.id;
+  const isAssignee = ticket && ticket.assignedTo && ticket.assignedTo.id === user.id;
 
   const allowedTransitions = ticket ? (VALID_TRANSITIONS[ticket.status] || []) : [];
-  const visibleTransitions = isWorker
-    ? []
-    : allowedTransitions;
+  let visibleTransitions;
+  if (isWorker) {
+    if (isCreator) {
+      visibleTransitions = allowedTransitions;
+    } else if (isAssignee) {
+      visibleTransitions = allowedTransitions.filter((s) => s !== 'closed');
+    } else {
+      visibleTransitions = [];
+    }
+  } else {
+    visibleTransitions = allowedTransitions;
+  }
+
+  const canRequestClose = ticket && isWorker && isAssignee && !isCreator
+    && ticket.status !== 'closed' && !ticket.closeRequest;
+
+  const handleRequestClose = async () => {
+    setActionError('');
+    try {
+      const updated = await ticketService.requestClose(id);
+      setTicket(updated);
+      const updatedHistory = await ticketService.getHistory(id);
+      setHistory(updatedHistory);
+    } catch (err) {
+      setActionError(err.response?.data?.error || 'Failed to request close');
+    }
+  };
+
+  const handleCloseRequestAction = async (action) => {
+    setActionError('');
+    try {
+      const updated = await ticketService.handleCloseRequest(id, action);
+      setTicket(updated);
+      const updatedHistory = await ticketService.getHistory(id);
+      setHistory(updatedHistory);
+    } catch (err) {
+      setActionError(err.response?.data?.error || 'Failed to handle close request');
+    }
+  };
 
   if (loading) {
     return (
@@ -300,8 +333,8 @@ export default function TicketDetailPage() {
                     </div>
                     <p className="history-change">
                       Changed <strong>{fieldLabel(h.fieldChanged)}</strong>
-                      {h.oldValue && <> from <span className="history-old">{h.oldValue}</span></>}
-                      {h.newValue && <> to <span className="history-new">{h.newValue}</span></>}
+                      {h.oldValue && <> from <span className="history-old">{formatHistoryValue(h.fieldChanged, h.oldValue)}</span></>}
+                      {h.newValue && <> to <span className="history-new">{formatHistoryValue(h.fieldChanged, h.newValue)}</span></>}
                     </p>
                   </div>
                 ))}
@@ -327,6 +360,28 @@ export default function TicketDetailPage() {
                     {statusLabels[s]}
                   </button>
                 ))}
+              </div>
+            )}
+            {canRequestClose && (
+              <div className="status-actions">
+                <button className="btn-sm btn-status btn-status-closed" onClick={handleRequestClose}>
+                  Request Close
+                </button>
+              </div>
+            )}
+            {ticket.closeRequest && (
+              <div className="close-request-banner">
+                <p>Close requested by {ticket.closeRequest.requestedBy.firstName} {ticket.closeRequest.requestedBy.lastName}</p>
+                {isAdminOrManager && (
+                  <div className="close-request-actions">
+                    <button className="btn-sm btn-toggle-on" onClick={() => handleCloseRequestAction('approve')}>
+                      Approve
+                    </button>
+                    <button className="btn-sm btn-toggle-off" onClick={() => handleCloseRequestAction('deny')}>
+                      Deny
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -384,11 +439,6 @@ export default function TicketDetailPage() {
                     ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
                     : 'Unassigned'}
                 </p>
-                {canSelfAssign && (
-                  <button className="btn-primary-inline btn-take" onClick={handleSelfAssign}>
-                    Take Ticket
-                  </button>
-                )}
               </>
             )}
           </div>

@@ -9,8 +9,8 @@ const statusLabels = { open: 'Open', in_progress: 'In Progress', on_hold: 'On Ho
 
 const roleLabels = { admin: 'Administrator', manager: 'Manager', worker: 'Worker' };
 
-const priorityColors = { low: '#2e7d32', medium: '#e65100', high: '#c62828', critical: '#b71c1c' };
-const statusColors = { open: '#1565c0', in_progress: '#e65100', on_hold: '#7b1fa2', closed: '#666' };
+const priorityColors = { low: '#22c55e', medium: '#f59e0b', high: '#ef4444', critical: '#dc2626' };
+const statusColors = { open: '#7c3aed', in_progress: '#f59e0b', on_hold: '#6b7280', closed: '#22c55e' };
 
 function StatCard({ label, value, accent }) {
   return (
@@ -111,9 +111,9 @@ export default function DashboardPage() {
 
       <div className="stat-cards-row">
         <StatCard label="Total Tickets" value={stats.total} />
-        <StatCard label="Open" value={openCount} accent="#1565c0" />
-        <StatCard label="In Progress" value={inProgressCount} accent="#e65100" />
-        <StatCard label="Unassigned" value={stats.unassigned} accent="#c62828" />
+        <StatCard label="Open" value={openCount} accent="#7c3aed" />
+        <StatCard label="In Progress" value={inProgressCount} accent="#f59e0b" />
+        <StatCard label="Unassigned" value={stats.unassigned} accent="#ef4444" />
       </div>
 
       <div className="dashboard-grid">
@@ -174,30 +174,6 @@ export default function DashboardPage() {
           </table>
         </div>
       )}
-
-      <div className="dashboard-cards" style={{ marginTop: '1rem' }}>
-        <div className="card card-clickable" onClick={() => navigate('/tickets')}>
-          <h3>View All Tickets</h3>
-          <p className="card-detail">Browse, filter, and manage tickets</p>
-        </div>
-
-        {user.role === 'admin' && (
-          <>
-            <div className="card card-clickable" onClick={() => navigate('/admin/users')}>
-              <h3>User Management</h3>
-              <p className="card-detail">Create and manage system users</p>
-            </div>
-            <div className="card card-clickable" onClick={() => navigate('/admin/categories')}>
-              <h3>Category Management</h3>
-              <p className="card-detail">Manage ticket categories</p>
-            </div>
-            <div className="card card-clickable" onClick={() => navigate('/admin/departments')}>
-              <h3>Department Management</h3>
-              <p className="card-detail">Create and manage departments</p>
-            </div>
-          </>
-        )}
-      </div>
     </DashboardLayout>
   );
 }

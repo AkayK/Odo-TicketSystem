@@ -21,18 +21,18 @@ async function seed() {
         departmentName: null,
       },
       {
-        email: 'manager@ticketsys.com',
+        email: 'it.manager@ticketsys.com',
         password: 'Manager123!',
-        firstName: 'IT',
-        lastName: 'Manager',
+        firstName: 'Ahmet',
+        lastName: 'Yilmaz',
         roleName: 'manager',
         departmentName: 'IT',
       },
       {
-        email: 'worker@ticketsys.com',
+        email: 'it.worker1@ticketsys.com',
         password: 'Worker123!',
-        firstName: 'IT',
-        lastName: 'Worker',
+        firstName: 'Mehmet',
+        lastName: 'Kaya',
         roleName: 'worker',
         departmentName: 'IT',
       },
@@ -67,11 +67,11 @@ async function seed() {
 
     console.log('\nSeed completed successfully');
     console.log('\nTest Credentials:');
-    console.log('─────────────────────────────────────────');
-    console.log('Admin:      admin@ticketsys.com   / Admin123!');
-    console.log('IT Manager: manager@ticketsys.com / Manager123!');
-    console.log('IT Worker:  worker@ticketsys.com  / Worker123!');
-    console.log('─────────────────────────────────────────');
+    console.log('─────────────────────────────────────────────────');
+    console.log('Admin:      admin@ticketsys.com          / Admin123!');
+    console.log('IT Manager: it.manager@ticketsys.com     / Manager123!');
+    console.log('IT Worker:  it.worker1@ticketsys.com     / Worker123!');
+    console.log('─────────────────────────────────────────────────');
   } catch (error) {
     console.error('Seed failed:', error.message);
     process.exit(1);

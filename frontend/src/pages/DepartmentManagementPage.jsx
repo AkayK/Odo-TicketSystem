@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { departmentService } from '../services/departmentService';
 
@@ -101,7 +100,6 @@ function DepartmentFormModal({ isOpen, onClose, onSubmit, department, isSubmitti
 }
 
 export default function DepartmentManagementPage() {
-  const navigate = useNavigate();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -179,12 +177,7 @@ export default function DepartmentManagementPage() {
   return (
     <DashboardLayout>
       <div className="page-header">
-        <div className="page-header-left">
-          <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            &larr; Back
-          </button>
-          <h2>Department Management</h2>
-        </div>
+        <h2>Department Management</h2>
         <button className="btn-primary-inline" onClick={openCreateModal}>
           + Create Department
         </button>

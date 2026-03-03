@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import UserFormModal from '../components/UserFormModal';
 import { userService } from '../services/userService';
@@ -11,7 +10,6 @@ const roleLabels = {
 };
 
 export default function UserManagementPage() {
-  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -94,12 +92,7 @@ export default function UserManagementPage() {
   return (
     <DashboardLayout>
       <div className="page-header">
-        <div className="page-header-left">
-          <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            &larr; Back
-          </button>
-          <h2>User Management</h2>
-        </div>
+        <h2>User Management</h2>
         <button className="btn-primary-inline" onClick={openCreateModal}>
           + Create User
         </button>

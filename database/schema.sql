@@ -95,13 +95,16 @@ CREATE TABLE IF NOT EXISTS tickets (
   created_by INT NOT NULL,
   assigned_to INT DEFAULT NULL,
   department_id INT NOT NULL,
+  close_requested_at DATETIME DEFAULT NULL,
+  close_requested_by INT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (category_id) REFERENCES categories(id),
   FOREIGN KEY (created_by) REFERENCES users(id),
   FOREIGN KEY (assigned_to) REFERENCES users(id),
-  FOREIGN KEY (department_id) REFERENCES departments(id)
+  FOREIGN KEY (department_id) REFERENCES departments(id),
+  FOREIGN KEY (close_requested_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────

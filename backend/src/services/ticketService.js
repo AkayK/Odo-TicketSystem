@@ -39,6 +39,16 @@ function toTicketDTO(row) {
           email: row.assignee_email,
         }
       : null,
+    closeRequest: row.close_requested_at
+      ? {
+          requestedAt: row.close_requested_at,
+          requestedBy: {
+            id: row.close_requested_by,
+            firstName: row.close_requester_first_name,
+            lastName: row.close_requester_last_name,
+          },
+        }
+      : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -113,6 +123,102 @@ const ticketService = {
       filters,
     });
     return rows.map(toTicketDTO);
+  },
+
+  async requestClose(id, currentUser) {
+    const ticket = await ticketModel.findById(id);
+    if (!ticket) {
+      throw new NotFoundError('Ticket not found');
+    }
+
+    if (currentUser.role !== 'worker') {
+      throw new ForbiddenError('Only workers can request close');
+    }
+
+    if (ticket.assignee_id !== currentUser.id) {
+      throw new ForbiddenError('You can only request close on tickets assigned to you');
+    }
+
+    if (ticket.creator_id === currentUser.id) {
+      throw new ForbiddenError('You can close tickets you created directly');
+    }
+
+    if (ticket.status === 'closed') {
+      throw new ValidationError('Ticket is already closed');
+    }
+
+    if (ticket.close_requested_at) {
+      throw new ValidationError('A close request is already pending');
+    }
+
+    await ticketModel.update(id, {
+      closeRequestedAt: new Date(),
+      closeRequestedBy: currentUser.id,
+    });
+
+    await ticketModel.createHistoryEntry({
+      ticketId: id,
+      changedBy: currentUser.id,
+      fieldChanged: 'close_request',
+      oldValue: null,
+      newValue: 'requested',
+    });
+
+    return this.getById(id, currentUser);
+  },
+
+  async handleCloseRequest(id, data, currentUser) {
+    const { action } = data;
+    if (!action || !['approve', 'deny'].includes(action)) {
+      throw new ValidationError('Action must be "approve" or "deny"');
+    }
+
+    const ticket = await ticketModel.findById(id);
+    if (!ticket) {
+      throw new NotFoundError('Ticket not found');
+    }
+
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') {
+      throw new ForbiddenError('Only managers and admins can handle close requests');
+    }
+
+    if (currentUser.role === 'manager' && ticket.department_id !== currentUser.departmentId) {
+      throw new ForbiddenError('You can only handle close requests in your department');
+    }
+
+    if (!ticket.close_requested_at) {
+      throw new ValidationError('No pending close request on this ticket');
+    }
+
+    if (action === 'approve') {
+      await logChanges(id, currentUser.id, ticket, { status: 'closed' });
+      await ticketModel.update(id, {
+        status: 'closed',
+        closeRequestedAt: null,
+        closeRequestedBy: null,
+      });
+      await ticketModel.createHistoryEntry({
+        ticketId: id,
+        changedBy: currentUser.id,
+        fieldChanged: 'close_request',
+        oldValue: 'requested',
+        newValue: 'approved',
+      });
+    } else {
+      await ticketModel.update(id, {
+        closeRequestedAt: null,
+        closeRequestedBy: null,
+      });
+      await ticketModel.createHistoryEntry({
+        ticketId: id,
+        changedBy: currentUser.id,
+        fieldChanged: 'close_request',
+        oldValue: 'requested',
+        newValue: 'denied',
+      });
+    }
+
+    return this.getById(id, currentUser);
   },
 
   async getById(id, currentUser) {
@@ -244,8 +350,8 @@ const ticketService = {
       throw new ValidationError(`Status must be one of: ${VALID_STATUSES.join(', ')}`);
     }
 
-    if (currentUser.role === 'worker' && status === 'closed') {
-      throw new ForbiddenError('Workers cannot close tickets');
+    if (currentUser.role === 'worker' && status === 'closed' && ticket.creator_id !== currentUser.id) {
+      throw new ForbiddenError('Workers can only close tickets they created');
     }
 
     const allowed = VALID_TRANSITIONS[ticket.status];
@@ -310,7 +416,37 @@ const ticketService = {
     }
 
     const rows = await ticketModel.findHistoryByTicketId(ticketId);
-    return rows.map(toHistoryDTO);
+    const dtos = rows.map(toHistoryDTO);
+
+    const userIds = new Set();
+    for (const dto of dtos) {
+      if (dto.fieldChanged === 'assigned_to') {
+        if (dto.oldValue) userIds.add(Number(dto.oldValue));
+        if (dto.newValue) userIds.add(Number(dto.newValue));
+      }
+    }
+
+    if (userIds.size > 0) {
+      const userMap = {};
+      const resolvePromises = Array.from(userIds).map(async (uid) => {
+        const u = await userModel.findById(uid);
+        if (u) userMap[uid] = `${u.first_name} ${u.last_name}`;
+      });
+      await Promise.all(resolvePromises);
+
+      for (const dto of dtos) {
+        if (dto.fieldChanged === 'assigned_to') {
+          if (dto.oldValue && userMap[Number(dto.oldValue)]) {
+            dto.oldValue = userMap[Number(dto.oldValue)];
+          }
+          if (dto.newValue && userMap[Number(dto.newValue)]) {
+            dto.newValue = userMap[Number(dto.newValue)];
+          }
+        }
+      }
+    }
+
+    return dtos;
   },
 };
 

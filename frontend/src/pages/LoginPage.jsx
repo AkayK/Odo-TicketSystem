@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>Ticket System</h1>
+        <img src="/odo-logo.png" alt="odo" className="login-logo" />
         <p className="login-subtitle">Sign in to your account</p>
 
         {error && <div className="error-message">{error}</div>}

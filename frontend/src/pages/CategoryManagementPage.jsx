@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { categoryService } from '../services/categoryService';
 
@@ -117,7 +116,6 @@ function CategoryFormModal({ isOpen, onClose, onSubmit, category, departments, i
 }
 
 export default function CategoryManagementPage() {
-  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -200,12 +198,7 @@ export default function CategoryManagementPage() {
   return (
     <DashboardLayout>
       <div className="page-header">
-        <div className="page-header-left">
-          <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            &larr; Back
-          </button>
-          <h2>Category Management</h2>
-        </div>
+        <h2>Category Management</h2>
         <button className="btn-primary-inline" onClick={openCreateModal}>
           + Create Category
         </button>

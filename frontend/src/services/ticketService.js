@@ -43,4 +43,14 @@ export const ticketService = {
     const { data } = await api.get(`/tickets/${id}/history`);
     return data.data;
   },
+
+  async requestClose(id) {
+    const { data } = await api.put(`/tickets/${id}/request-close`);
+    return data.data;
+  },
+
+  async handleCloseRequest(id, action) {
+    const { data } = await api.put(`/tickets/${id}/close-request`, { action });
+    return data.data;
+  },
 };

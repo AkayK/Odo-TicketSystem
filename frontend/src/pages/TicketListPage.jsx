@@ -146,6 +146,7 @@ export default function TicketListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tickets, setTickets] = useState([]);
+  const [crossDeptTickets, setCrossDeptTickets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -155,6 +156,7 @@ export default function TicketListPage() {
   const [ticketCount, setTicketCount] = useState(0);
 
   const isAdmin = user.role === 'admin';
+  const isWorker = user.role === 'worker';
   const isAdminOrManager = isAdmin || user.role === 'manager';
 
   const [filters, setFilters] = useState({
@@ -189,6 +191,16 @@ export default function TicketListPage() {
     }
   }, []);
 
+  const loadCrossDeptTickets = useCallback(async () => {
+    if (!isWorker) return;
+    try {
+      const data = await ticketService.getAll({ scope: 'crossDeptCreated' });
+      setCrossDeptTickets(data);
+    } catch {
+      setCrossDeptTickets([]);
+    }
+  }, [isWorker]);
+
   const loadMeta = useCallback(async () => {
     try {
       const categoriesData = await categoryService.getAll();
@@ -209,7 +221,7 @@ export default function TicketListPage() {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([loadTickets(filters, sort), loadMeta()]);
+      await Promise.all([loadTickets(filters, sort), loadMeta(), loadCrossDeptTickets()]);
       setLoading(false);
     };
     init();
@@ -219,7 +231,8 @@ export default function TicketListPage() {
   useEffect(() => {
     if (loading) return;
     loadTickets(filters, sort);
-  }, [filters, sort, loading, loadTickets]);
+    loadCrossDeptTickets();
+  }, [filters, sort, loading, loadTickets, loadCrossDeptTickets]);
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -269,12 +282,7 @@ export default function TicketListPage() {
   return (
     <DashboardLayout>
       <div className="page-header">
-        <div className="page-header-left">
-          <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            &larr; Back
-          </button>
-          <h2>Tickets</h2>
-        </div>
+        <h2>Tickets</h2>
         <button className="btn-primary-inline" onClick={() => setModalOpen(true)}>
           + Create Ticket
         </button>
@@ -394,6 +402,102 @@ export default function TicketListPage() {
           )}
         </tbody>
       </table>
+
+      {isAdminOrManager && (() => {
+        const closeRequested = tickets.filter((t) => t.closeRequest);
+        if (closeRequested.length === 0) return null;
+        return (
+          <>
+            <h3 style={{ margin: '1.5rem 0 0.75rem' }}>Pending Close Requests</h3>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Requested By</th>
+                  <th>Assigned To</th>
+                  <th>Requested</th>
+                </tr>
+              </thead>
+              <tbody>
+                {closeRequested.map((t) => (
+                  <tr
+                    key={t.id}
+                    className="row-clickable"
+                    onClick={() => navigate(`/tickets/${t.id}`)}
+                  >
+                    <td>{t.title}</td>
+                    <td>
+                      <span className={`priority-badge priority-${t.priority}`}>
+                        {priorityLabels[t.priority]}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`ticket-status-badge ticket-status-${t.status}`}>
+                        {statusLabels[t.status]}
+                      </span>
+                    </td>
+                    <td>{t.closeRequest.requestedBy.firstName} {t.closeRequest.requestedBy.lastName}</td>
+                    <td>
+                      {t.assignedTo
+                        ? `${t.assignedTo.firstName} ${t.assignedTo.lastName}`
+                        : '-'}
+                    </td>
+                    <td>{new Date(t.closeRequest.requestedAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        );
+      })()}
+
+      {isWorker && crossDeptTickets.length > 0 && (
+        <>
+          <h3 style={{ margin: '1.5rem 0 0.75rem' }}>My Tickets in Other Departments</h3>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Department</th>
+                <th>Assigned To</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {crossDeptTickets.map((t) => (
+                <tr
+                  key={t.id}
+                  className="row-clickable"
+                  onClick={() => navigate(`/tickets/${t.id}`)}
+                >
+                  <td>{t.title}</td>
+                  <td>
+                    <span className={`priority-badge priority-${t.priority}`}>
+                      {priorityLabels[t.priority]}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`ticket-status-badge ticket-status-${t.status}`}>
+                      {statusLabels[t.status]}
+                    </span>
+                  </td>
+                  <td>{t.department.name}</td>
+                  <td>
+                    {t.assignedTo
+                      ? `${t.assignedTo.firstName} ${t.assignedTo.lastName}`
+                      : '-'}
+                  </td>
+                  <td>{new Date(t.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
 
       <CreateTicketModal
         isOpen={modalOpen}

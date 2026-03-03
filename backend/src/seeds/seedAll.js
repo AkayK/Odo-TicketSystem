@@ -99,10 +99,6 @@ const users = [
   // Customer Support Department
   { email: 'cs.manager@ticketsys.com', password: 'Manager123!', firstName: 'Deniz', lastName: 'Polat', role: 'manager', department: 'Customer Support' },
   { email: 'cs.worker1@ticketsys.com', password: 'Worker123!', firstName: 'Cem', lastName: 'Erdem', role: 'worker', department: 'Customer Support' },
-
-  // Keep legacy test accounts for backward compatibility
-  { email: 'manager@ticketsys.com', password: 'Manager123!', firstName: 'IT', lastName: 'Manager', role: 'manager', department: 'IT' },
-  { email: 'worker@ticketsys.com', password: 'Worker123!', firstName: 'IT', lastName: 'Worker', role: 'worker', department: 'IT' },
 ];
 
 const tickets = [
@@ -434,8 +430,6 @@ async function seedAll() {
     console.log('Mkt Worker:      mkt.worker1@ticketsys.com  / Worker123!');
     console.log('CS Manager:      cs.manager@ticketsys.com   / Manager123!');
     console.log('CS Worker:       cs.worker1@ticketsys.com   / Worker123!');
-    console.log('──────────────────────────────────────────────────────────');
-    console.log('Legacy aliases: manager@ticketsys.com, worker@ticketsys.com');
     console.log('──────────────────────────────────────────────────────────');
   } catch (error) {
     console.error('Seed failed:', error.message);
