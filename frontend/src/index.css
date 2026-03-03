@@ -903,6 +903,49 @@ body {
   gap: 1rem;
 }
 
+/* Pie chart */
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.pie-chart-container svg {
+  flex-shrink: 0;
+}
+
+.pie-chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.pie-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pie-legend-label {
+  font-weight: 500;
+  color: var(--odo-text);
+  min-width: 60px;
+}
+
+.pie-legend-value {
+  color: var(--odo-text-light);
+  font-size: 0.8rem;
+}
+
 /* Distribution bars */
 .dist-bar-container {
   display: flex;

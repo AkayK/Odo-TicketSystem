@@ -168,22 +168,32 @@ odo/
 
 ## Test Users
 
-| Role            | Email                        | Password     | Department       |
-|----------------|------------------------------|-------------|------------------|
-| Admin           | admin@ticketsys.com          | Admin123!   | —                |
-| IT Manager      | it.manager@ticketsys.com     | Manager123! | IT               |
-| IT Worker 1     | it.worker1@ticketsys.com     | Worker123!  | IT               |
-| IT Worker 2     | it.worker2@ticketsys.com     | Worker123!  | IT               |
-| HR Manager      | hr.manager@ticketsys.com     | Manager123! | HR               |
-| HR Worker       | hr.worker1@ticketsys.com     | Worker123!  | HR               |
-| Finance Manager | fin.manager@ticketsys.com    | Manager123! | Finance          |
-| Finance Worker  | fin.worker1@ticketsys.com    | Worker123!  | Finance          |
-| Ops Manager     | ops.manager@ticketsys.com    | Manager123! | Operations       |
-| Ops Worker      | ops.worker1@ticketsys.com    | Worker123!  | Operations       |
-| Mkt Manager     | mkt.manager@ticketsys.com    | Manager123! | Marketing        |
-| Mkt Worker      | mkt.worker1@ticketsys.com    | Worker123!  | Marketing        |
-| CS Manager      | cs.manager@ticketsys.com     | Manager123! | Customer Support |
-| CS Worker       | cs.worker1@ticketsys.com     | Worker123!  | Customer Support |
+| Role             | Email                        | Password     | Department       |
+|-----------------|------------------------------|-------------|------------------|
+| Admin            | admin@ticketsys.com          | Admin123!   | —                |
+| IT Manager       | it.manager@ticketsys.com     | Manager123! | IT               |
+| IT Worker 1      | it.worker1@ticketsys.com     | Worker123!  | IT               |
+| IT Worker 2      | it.worker2@ticketsys.com     | Worker123!  | IT               |
+| IT Worker 3      | it.worker3@ticketsys.com     | Worker123!  | IT               |
+| HR Manager       | hr.manager@ticketsys.com     | Manager123! | HR               |
+| HR Worker 1      | hr.worker1@ticketsys.com     | Worker123!  | HR               |
+| HR Worker 2      | hr.worker2@ticketsys.com     | Worker123!  | HR               |
+| Finance Manager  | fin.manager@ticketsys.com    | Manager123! | Finance          |
+| Finance Worker 1 | fin.worker1@ticketsys.com    | Worker123!  | Finance          |
+| Finance Worker 2 | fin.worker2@ticketsys.com    | Worker123!  | Finance          |
+| Ops Manager      | ops.manager@ticketsys.com    | Manager123! | Operations       |
+| Ops Worker 1     | ops.worker1@ticketsys.com    | Worker123!  | Operations       |
+| Ops Worker 2     | ops.worker2@ticketsys.com    | Worker123!  | Operations       |
+| Mkt Manager      | mkt.manager@ticketsys.com    | Manager123! | Marketing        |
+| Mkt Worker 1     | mkt.worker1@ticketsys.com    | Worker123!  | Marketing        |
+| Mkt Worker 2     | mkt.worker2@ticketsys.com    | Worker123!  | Marketing        |
+| Legal Manager    | legal.manager@ticketsys.com  | Manager123! | Legal            |
+| Legal Worker     | legal.worker1@ticketsys.com  | Worker123!  | Legal            |
+| CS Manager       | cs.manager@ticketsys.com     | Manager123! | Customer Support |
+| CS Worker 1      | cs.worker1@ticketsys.com     | Worker123!  | Customer Support |
+| CS Worker 2      | cs.worker2@ticketsys.com     | Worker123!  | Customer Support |
+| General Manager  | gen.manager@ticketsys.com    | Manager123! | General          |
+| General Worker   | gen.worker1@ticketsys.com    | Worker123!  | General          |
 
 ## Git Workflow
 - Conventional commits: feat:, fix:, refactor:, docs:, chore:

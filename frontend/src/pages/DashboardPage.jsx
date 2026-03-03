@@ -21,6 +21,54 @@ function StatCard({ label, value, accent }) {
   );
 }
 
+function PieChart({ items, colorMap, labelMap }) {
+  const total = items.reduce((sum, i) => sum + i.count, 0);
+  if (total === 0) return <p className="empty-state">No data</p>;
+
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 60;
+
+  let cumulative = 0;
+  const slices = items.filter((i) => i.count > 0).map((item) => {
+    const fraction = item.count / total;
+    const startAngle = cumulative * 2 * Math.PI;
+    cumulative += fraction;
+    const endAngle = cumulative * 2 * Math.PI;
+    const largeArc = fraction > 0.5 ? 1 : 0;
+    const x1 = cx + radius * Math.sin(startAngle);
+    const y1 = cy - radius * Math.cos(startAngle);
+    const x2 = cx + radius * Math.sin(endAngle);
+    const y2 = cy - radius * Math.cos(endAngle);
+
+    const d = items.filter((i) => i.count > 0).length === 1
+      ? `M ${cx},${cy - radius} A ${radius},${radius} 0 1,1 ${cx - 0.001},${cy - radius} Z`
+      : `M ${cx},${cy} L ${x1},${y1} A ${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
+
+    return { ...item, d, color: colorMap[item.key] || '#4a6cf7', fraction };
+  });
+
+  return (
+    <div className="pie-chart-container">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {slices.map((s) => (
+          <path key={s.key} d={s.d} fill={s.color} />
+        ))}
+      </svg>
+      <div className="pie-chart-legend">
+        {slices.map((s) => (
+          <div key={s.key} className="pie-legend-item">
+            <span className="pie-legend-dot" style={{ backgroundColor: s.color }} />
+            <span className="pie-legend-label">{labelMap[s.key] || s.key}</span>
+            <span className="pie-legend-value">{s.count} ({Math.round(s.fraction * 100)}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DistributionBar({ items, colorMap, labelMap }) {
   const total = items.reduce((sum, i) => sum + i.count, 0);
   if (total === 0) return <p className="empty-state">No data</p>;
@@ -124,7 +172,7 @@ export default function DashboardPage() {
 
         <div className="card">
           <h3>By Priority</h3>
-          <DistributionBar items={priorityItems} colorMap={priorityColors} labelMap={priorityLabels} />
+          <PieChart items={priorityItems} colorMap={priorityColors} labelMap={priorityLabels} />
         </div>
       </div>
 
