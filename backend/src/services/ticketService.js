@@ -398,6 +398,9 @@ const ticketService = {
       if (!assignee || !assignee.is_active) {
         throw new ValidationError('Assignee user not found or is inactive');
       }
+      if (currentUser.role === 'manager' && assignee.department_id !== currentUser.departmentId) {
+        throw new ForbiddenError('Managers can only assign tickets to users in their department');
+      }
     }
 
     await logChanges(id, currentUser.id, ticket, { assignedTo });

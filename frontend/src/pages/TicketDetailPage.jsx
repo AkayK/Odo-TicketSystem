@@ -72,7 +72,12 @@ export default function TicketDetailPage() {
       if (isAdminOrManager) {
         try {
           const usersData = await userService.getAll();
-          setUsers(usersData.filter((u) => u.isActive));
+          const activeUsers = usersData.filter((u) => u.isActive);
+          if (user.role === 'manager') {
+            setUsers(activeUsers.filter((u) => u.departmentId === user.departmentId));
+          } else {
+            setUsers(activeUsers);
+          }
         } catch {
           setUsers([]);
         }

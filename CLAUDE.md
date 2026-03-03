@@ -42,7 +42,7 @@ odo/
 2. **departments** - id, name (IT/HR/Finance/Operations/General), description
 3. **users** - id, email, password_hash, first_name, last_name, role_id (FK), department_id (FK), is_active, created_at, updated_at
 4. **categories** - id, name, description, department_id (FK), is_active, created_at
-5. **tickets** - id, title, description, category_id (FK), priority (enum), status (enum), created_by (FK users), assigned_to (FK users), department_id (FK), created_at, updated_at
+5. **tickets** - id, title, description, category_id (FK), priority (enum), status (enum), created_by (FK users), assigned_to (FK users), department_id (FK), close_requested_at, close_requested_by (FK users), created_at, updated_at
 6. **ticket_history** - id, ticket_id (FK), changed_by (FK users), field_changed, old_value, new_value, created_at
 
 ### Enums
@@ -61,13 +61,17 @@ odo/
 | View department tickets   | Y     | Y       | N      |
 | Create tickets            | Y     | Y       | Y      |
 | Edit ticket fields        | Y     | N       | N      |
-| Update ticket status      | Y     | Y       | N      |
+| Update ticket status      | Y     | Y       | Y*     |
 | Change priority           | Y     | Y       | N      |
-| Close tickets             | Y     | Y       | N      |
+| Close tickets (own)       | Y     | Y       | Y**    |
+| Request close (assigned)  | N     | N       | Y***   |
+| Approve/deny close req    | Y     | Y       | N      |
 | Assign tickets            | Y     | Y       | N      |
-| Self-assign (dept pool)   | N     | N       | Y*     |
+| Self-assign (dept pool)   | N     | N       | N      |
 
-*Worker can take unassigned tickets from their own department.
+*Worker can change status on tickets they created or are assigned to (except closing assigned-only tickets).
+**Worker can close tickets they created directly.
+***Worker requests close on tickets assigned to them (not created by them); manager/admin approves or denies.
 
 ## Implementation Phases
 
@@ -143,12 +147,14 @@ odo/
 - `DELETE /api/categories/:id` - Deactivate category (admin)
 
 ### Tickets (Phase 4-5)
-- `GET /api/tickets` - List tickets (role-filtered)
+- `GET /api/tickets` - List tickets (role-filtered, supports `scope=crossDeptCreated` for workers)
 - `POST /api/tickets` - Create ticket
 - `GET /api/tickets/:id` - Get ticket detail
 - `PUT /api/tickets/:id` - Update ticket
 - `PUT /api/tickets/:id/status` - Change status
 - `PUT /api/tickets/:id/assign` - Assign ticket (manager/admin)
+- `PUT /api/tickets/:id/request-close` - Worker requests close on assigned ticket
+- `PUT /api/tickets/:id/close-request` - Manager/admin approves or denies close request (`{ action: "approve" | "deny" }`)
 - `GET /api/tickets/:id/history` - Get ticket history
 
 ### Departments (Phase 5)
@@ -178,8 +184,6 @@ odo/
 | Mkt Worker      | mkt.worker1@ticketsys.com    | Worker123!  | Marketing        |
 | CS Manager      | cs.manager@ticketsys.com     | Manager123! | Customer Support |
 | CS Worker       | cs.worker1@ticketsys.com     | Worker123!  | Customer Support |
-
-Legacy aliases: `manager@ticketsys.com` / `worker@ticketsys.com` (both IT dept)
 
 ## Git Workflow
 - Conventional commits: feat:, fix:, refactor:, docs:, chore:
