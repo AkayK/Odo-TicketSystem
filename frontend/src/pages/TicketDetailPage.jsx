@@ -118,6 +118,18 @@ export default function TicketDetailPage() {
     }
   };
 
+  const handleSelfAssign = async () => {
+    setActionError('');
+    try {
+      const updated = await ticketService.assign(id, user.id);
+      setTicket(updated);
+      const updatedHistory = await ticketService.getHistory(id);
+      setHistory(updatedHistory);
+    } catch (err) {
+      setActionError(err.response?.data?.error || 'Failed to take ticket');
+    }
+  };
+
   const startEditing = () => {
     setEditing(true);
     setEditForm({
@@ -176,16 +188,17 @@ export default function TicketDetailPage() {
   const isAdmin = user.role === 'admin';
   const isManager = user.role === 'manager';
 
-  const canEdit = ticket && ticket.status !== 'closed' && (
-    isAdmin ||
-    (isWorker && (ticket.createdBy.id === user.id || (ticket.assignedTo && ticket.assignedTo.id === user.id)))
-  );
+  const canEdit = ticket && ticket.status !== 'closed' && isAdmin;
 
   const canChangePriority = ticket && ticket.status !== 'closed' && (isAdmin || isManager);
 
+  const canSelfAssign = ticket && isWorker && ticket.status !== 'closed'
+    && !ticket.assignedTo
+    && ticket.department.id === user.departmentId;
+
   const allowedTransitions = ticket ? (VALID_TRANSITIONS[ticket.status] || []) : [];
   const visibleTransitions = isWorker
-    ? allowedTransitions.filter((s) => s !== 'closed')
+    ? []
     : allowedTransitions;
 
   if (loading) {
@@ -365,11 +378,18 @@ export default function TicketDetailPage() {
                 ))}
               </select>
             ) : (
-              <p>
-                {ticket.assignedTo
-                  ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
-                  : 'Unassigned'}
-              </p>
+              <>
+                <p>
+                  {ticket.assignedTo
+                    ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
+                    : 'Unassigned'}
+                </p>
+                {canSelfAssign && (
+                  <button className="btn-primary-inline btn-take" onClick={handleSelfAssign}>
+                    Take Ticket
+                  </button>
+                )}
+              </>
             )}
           </div>
 

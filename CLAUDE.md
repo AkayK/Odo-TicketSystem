@@ -60,12 +60,14 @@ odo/
 | View all tickets          | Y     | N       | N      |
 | View department tickets   | Y     | Y       | N      |
 | Create tickets            | Y     | Y       | Y      |
-| Update ticket status      | Y     | Y       | Y*     |
+| Edit ticket fields        | Y     | N       | N      |
+| Update ticket status      | Y     | Y       | N      |
 | Change priority           | Y     | Y       | N      |
 | Close tickets             | Y     | Y       | N      |
 | Assign tickets            | Y     | Y       | N      |
+| Self-assign (dept pool)   | N     | N       | Y*     |
 
-*Worker can update status only on tickets they created or are assigned to.
+*Worker can take unassigned tickets from their own department.
 
 ## Implementation Phases
 

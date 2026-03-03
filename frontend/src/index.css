@@ -677,6 +677,13 @@ body {
   border-color: #4a6cf7;
 }
 
+.btn-take {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.45rem;
+  font-size: 0.85rem;
+}
+
 /* History timeline */
 .history-timeline {
   display: flex;

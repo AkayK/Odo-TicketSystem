@@ -175,9 +175,7 @@ const ticketService = {
     }
 
     if (currentUser.role === 'worker') {
-      if (data.priority !== undefined) {
-        throw new ForbiddenError('Workers cannot change ticket priority');
-      }
+      throw new ForbiddenError('Workers cannot edit tickets');
     }
 
     if (currentUser.role === 'manager') {
@@ -270,7 +268,15 @@ const ticketService = {
     }
 
     if (currentUser.role === 'worker') {
-      throw new ForbiddenError('Workers cannot assign tickets');
+      if (ticket.department_id !== currentUser.departmentId) {
+        throw new ForbiddenError('You can only take tickets from your department');
+      }
+      if (assignedTo !== currentUser.id) {
+        throw new ForbiddenError('Workers can only assign tickets to themselves');
+      }
+      if (ticket.assignee_id !== null) {
+        throw new ForbiddenError('This ticket is already assigned');
+      }
     }
 
     if (currentUser.role === 'manager' && ticket.department_id !== currentUser.departmentId) {

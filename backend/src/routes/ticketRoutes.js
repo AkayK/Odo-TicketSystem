@@ -22,6 +22,6 @@ router.get('/:id/history', ticketController.getHistory);
 router.post('/', writeLimiter, ticketController.create);
 router.put('/:id', writeLimiter, ticketController.update);
 router.put('/:id/status', writeLimiter, ticketController.changeStatus);
-router.put('/:id/assign', requireRole('admin', 'manager'), writeLimiter, ticketController.assign);
+router.put('/:id/assign', writeLimiter, ticketController.assign);
 
 module.exports = router;
