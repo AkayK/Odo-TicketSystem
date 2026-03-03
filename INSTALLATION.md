@@ -1,13 +1,4 @@
-# Ticket Management System (Is Istem Yonetim Sistemi)
-
-A role-based ticket management system where users can create, track, and resolve work requests across departments.
-
-## Tech Stack
-
-- **Frontend:** React (Vite)
-- **Backend:** Node.js + Express.js
-- **Database:** MySQL
-- **Auth:** JWT
+# odo - Installation Guide
 
 ## Prerequisites
 
@@ -40,6 +31,20 @@ npm install
 npm run dev   # starts on http://localhost:5173
 ```
 
+## Environment Variables
+
+Create `backend/.env`:
+
+```
+PORT=3001
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=ticket_system
+JWT_SECRET=<your-secret>
+JWT_EXPIRES_IN=24h
+```
+
 ## Test Users
 
 | Role            | Email                        | Password     | Department       |
@@ -59,18 +64,32 @@ npm run dev   # starts on http://localhost:5173
 | CS Manager      | cs.manager@ticketsys.com     | Manager123! | Customer Support |
 | CS Worker       | cs.worker1@ticketsys.com     | Worker123!  | Customer Support |
 
-Legacy aliases: `manager@ticketsys.com` / `worker@ticketsys.com` (both IT dept)
+## Role Permissions
 
-## Environment Variables
+| Capability | Admin | Manager | Worker |
+|---|:---:|:---:|:---:|
+| View all tickets | Y | — | — |
+| View department tickets | Y | Y | — |
+| Create tickets | Y | Y | Y |
+| Edit ticket details | Y | — | — |
+| Change priority | Y | Y | — |
+| Change status | Y | Y | Y* |
+| Close own tickets | Y | Y | Y |
+| Request close (assigned) | — | — | Y |
+| Approve/deny close request | Y | Y | — |
+| Assign tickets | Y | Y | — |
+| Manage users | Y | — | — |
+| Manage categories | Y | — | — |
+| Manage departments | Y | — | — |
 
-Create `backend/.env`:
+\*Workers can change status on tickets they created or are assigned to, but cannot close tickets they did not create — they must request close instead. Workers only see tickets assigned to them and tickets they created.
+
+## Ticket Status Workflow
 
 ```
-PORT=3001
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=ticket_system
-JWT_SECRET=<your-secret>
-JWT_EXPIRES_IN=24h
+Open → In Progress → On Hold → Closed
+                                  ↓
+                              (Reopen → Open)
 ```
+
+**Close Request Flow:** Workers assigned to a ticket (but not the creator) cannot close it directly. They submit a close request that a manager or admin must approve or deny.
